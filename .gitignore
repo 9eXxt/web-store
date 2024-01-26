@@ -1,5 +1,11 @@
+# Maven generated files
 service/target/
 web/target/
 database/target/
+
+# macOS system files
 .DS_Store
 .DS_Store?
+
+# IntelliJ IDEA project files
+.idea/
