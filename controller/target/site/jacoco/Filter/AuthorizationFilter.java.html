@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthorizationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">controller</a> &gt; <a href="index.source.html" class="el_package">Filter</a> &gt; <span class="el_source">AuthorizationFilter.java</span></div><h1>AuthorizationFilter.java</h1><pre class="source lang-java linenums">package Filter;
+
+import access.AccessRule;
+import access.AdminAccessRule;
+import access.LoggedInAccessRule;
+import access.PublicAccessRule;
+import dao.CustomerDao;
+import dto.CustomerDto;
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import mapper.CreateCustomerMapper;
+import mapper.CustomerMapper;
+import service.CustomerService;
+import validator.CreateCustomerValidator;
+
+import java.io.IOException;
+import java.util.*;
+
+@WebFilter(&quot;/*&quot;)
+public class AuthorizationFilter implements Filter {
+    private final CustomerService customerService;
+    private final List&lt;AccessRule&gt; accessRules;
+
+<span class="nc" id="L27">    public AuthorizationFilter() {</span>
+<span class="nc" id="L28">        customerService = new CustomerService(</span>
+                new CustomerDao(new CustomerMapper()),
+                new CreateCustomerValidator(),
+                new CreateCustomerMapper()
+        );
+
+<span class="nc" id="L34">        accessRules = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L35">        accessRules.add(new AdminAccessRule());</span>
+<span class="nc" id="L36">        accessRules.add(new LoggedInAccessRule());</span>
+<span class="nc" id="L37">        accessRules.add(new PublicAccessRule());</span>
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+<span class="nc" id="L42">        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;</span>
+<span class="nc" id="L43">        HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;</span>
+
+<span class="nc" id="L45">        setLanguage(httpServletRequest);</span>
+<span class="nc" id="L46">        checkSessionToken(httpServletRequest);</span>
+
+<span class="nc" id="L48">        CustomerDto customerDto = (CustomerDto) httpServletRequest.getSession().getAttribute(&quot;customer&quot;);</span>
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        for (AccessRule rule : accessRules) {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (rule.isAllowed(httpServletRequest, customerDto)) {</span>
+<span class="nc" id="L52">                filterChain.doFilter(servletRequest, servletResponse);</span>
+<span class="nc" id="L53">                return;</span>
+            }
+<span class="nc" id="L55">        }</span>
+
+<span class="nc" id="L57">        httpServletResponse.sendRedirect(&quot;/shop/items&quot;);</span>
+<span class="nc" id="L58">    }</span>
+
+    private void setLanguage(HttpServletRequest request) {
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (request.getSession().getAttribute(&quot;lang&quot;) == null) {</span>
+<span class="nc" id="L62">            Locale preferredLocale = request.getLocale();</span>
+<span class="nc" id="L63">            String cookieInfo = getCookieValue(request, &quot;userLang&quot;);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            String language = cookieInfo != null ? cookieInfo :</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">                    (isSupportedLocale(preferredLocale) ? preferredLocale.toString() : &quot;en_GB&quot;);</span>
+<span class="nc" id="L66">            request.getSession().setAttribute(&quot;lang&quot;, language);</span>
+        }
+<span class="nc" id="L68">    }</span>
+
+    private void checkSessionToken(HttpServletRequest request) {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (request.getSession().getAttribute(&quot;tokenChecked&quot;) != null) return;</span>
+
+<span class="nc" id="L73">        String cookieInfo = getCookieValue(request, &quot;sessionToken&quot;);</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (cookieInfo == null) {</span>
+<span class="nc" id="L75">            return;</span>
+        }
+<span class="nc" id="L77">        Optional&lt;CustomerDto&gt; userSession = customerService.findByToken(cookieInfo);</span>
+<span class="nc" id="L78">        userSession.ifPresent(customerDto -&gt; request.getSession().setAttribute(&quot;customer&quot;, customerDto));</span>
+
+<span class="nc" id="L80">        request.getSession().setAttribute(&quot;tokenChecked&quot;, true);</span>
+<span class="nc" id="L81">    }</span>
+
+    private String getCookieValue(HttpServletRequest request, String cookieName) {
+<span class="nc" id="L84">        Cookie[] cookies = request.getCookies();</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (cookies != null) {</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            for (Cookie cookie : cookies) {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                if (cookieName.equals(cookie.getName())) {</span>
+<span class="nc" id="L88">                    return cookie.getValue();</span>
+                }
+            }
+        }
+<span class="nc" id="L92">        return null;</span>
+    }
+
+    private boolean isSupportedLocale(Locale preferredLocale) {
+        try {
+<span class="nc" id="L97">            ResourceBundle.getBundle(&quot;translations&quot;, preferredLocale);</span>
+<span class="nc" id="L98">            return true;</span>
+<span class="nc" id="L99">        } catch (MissingResourceException e) {</span>
+<span class="nc" id="L100">            return false;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

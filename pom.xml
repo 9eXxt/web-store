@@ -15,9 +15,9 @@
     </contributors>
 
     <modules>
-        <module>service</module>
-        <module>database</module>
-        <module>web</module>
+        <module>controller</module>
+        <module>model</module>
+        <module>view</module>
     </modules>
 
     <properties>

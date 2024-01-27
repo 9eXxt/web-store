@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrdersServlet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">controller</a> &gt; <a href="index.source.html" class="el_package">servlets</a> &gt; <span class="el_source">OrdersServlet.java</span></div><h1>OrdersServlet.java</h1><pre class="source lang-java linenums">package servlets;
+
+import dao.CustomerDao;
+import dao.ItemsDao;
+import dao.OrdersDao;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import mapper.CreateCustomerMapper;
+import mapper.CustomerMapper;
+import mapper.ItemMapper;
+import mapper.OrderMapper;
+import service.CustomerService;
+import service.ItemsService;
+import service.OrdersService;
+import util.JspHelper;
+import validator.CreateCustomerValidator;
+
+import java.io.IOException;
+
+@WebServlet(&quot;/orders&quot;)
+<span class="nc" id="L24">public class OrdersServlet extends HttpServlet {</span>
+    private OrdersService ordersService;
+    private CustomerService customerService;
+    private ItemsService itemsService;
+
+    @Override
+    public void init() throws ServletException {
+<span class="nc" id="L31">        ordersService = new OrdersService(</span>
+                new OrdersDao(new OrderMapper())
+        );
+<span class="nc" id="L34">        customerService = new CustomerService(</span>
+                new CustomerDao(new CustomerMapper()),
+                new CreateCustomerValidator(),
+                new CreateCustomerMapper()
+        );
+<span class="nc" id="L39">        itemsService = new ItemsService(</span>
+                new ItemsDao(new ItemMapper())
+        );
+<span class="nc" id="L42">    }</span>
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (req.getParameter(&quot;customerId&quot;) != null) {</span>
+<span class="nc" id="L47">            Integer customer_id = Integer.valueOf(req.getParameter(&quot;customerId&quot;));</span>
+<span class="nc" id="L48">            req.setAttribute(&quot;customerOrders&quot;, ordersService.findOrdersByCustomer(customer_id));</span>
+<span class="nc" id="L49">            req.setAttribute(&quot;customerInfo&quot;, customerService.findById(customer_id).get());</span>
+<span class="nc" id="L50">            req.getRequestDispatcher(JspHelper.getPath(&quot;ordersByCustomer&quot;)).forward(req, resp);</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        } else if (req.getParameter(&quot;itemsId&quot;) != null) {</span>
+<span class="nc" id="L52">            Integer item_id = Integer.valueOf(req.getParameter(&quot;itemsId&quot;));</span>
+<span class="nc" id="L53">            req.setAttribute(&quot;itemOrders&quot;, ordersService.findOrdersByItems(item_id));</span>
+<span class="nc" id="L54">            req.setAttribute(&quot;itemInfo&quot;, itemsService.findAll());</span>
+<span class="nc" id="L55">            req.setAttribute(&quot;customerInfo&quot;, customerService.findAll());</span>
+<span class="nc" id="L56">            req.getRequestDispatcher(JspHelper.getPath(&quot;ordersByItem&quot;)).forward(req, resp);</span>
+        }
+
+<span class="nc" id="L59">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

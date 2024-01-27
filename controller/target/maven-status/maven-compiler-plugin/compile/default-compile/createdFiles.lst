@@ -1,0 +1,15 @@
+util/JspHelper.class
+util/UrlPath.class
+access/LoggedInAccessRule.class
+servlets/RegistrationServlet.class
+servlets/ItemsServlet.class
+Filter/AuthorizationFilter.class
+access/AdminAccessRule.class
+servlets/CustomerServlet.class
+servlets/LogoutServlet.class
+servlets/LocaleServlet.class
+servlets/OrdersServlet.class
+AppRunner.class
+access/PublicAccessRule.class
+servlets/LoginServlet.class
+access/AccessRule.class
