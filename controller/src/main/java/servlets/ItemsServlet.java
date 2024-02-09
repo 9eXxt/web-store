@@ -6,7 +6,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import mapper.ItemMapper;
 import service.ItemsService;
 import util.JspHelper;
 
@@ -19,7 +18,7 @@ public class ItemsServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         itemsService = new ItemsService(
-                new ItemsDao(new ItemMapper())
+                new ItemsDao()
         );
     }
 

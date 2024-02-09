@@ -1,11 +1,15 @@
 package dao;
 
+import com.querydsl.jpa.impl.JPAQuery;
 import entity.Items;
 
+import entity.QItems;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import mapper.ItemMapper;
+import org.hibernate.annotations.processing.HQL;
 import util.ConnectionManager;
+import util.ConnectionUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,23 +17,16 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
-public class ItemsDao {
-    private final ItemMapper itemMapper;
-    private static final String FIND_ALL = """
-            SELECT *
-            FROM items""";
+import static entity.QItems.*;
 
-    @SneakyThrows
+public class ItemsDao {
     public List<Items> findAll() {
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<Items> itemsList = new ArrayList<>();
-            while (resultSet.next()) {
-                itemsList.add(itemMapper.buildEntity(resultSet));
-            }
-            return itemsList;
+        var connection = ConnectionUtil.getSessionFactory();
+        try(var session = connection.openSession()) {
+            return new JPAQuery<Items>(session)
+                    .select(items)
+                    .from(items)
+                    .fetch();
         }
     }
 }

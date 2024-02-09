@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mapper.CreateCustomerMapper;
 import mapper.CustomerMapper;
-import mapper.ItemMapper;
 import mapper.OrderMapper;
 import service.CustomerService;
 import service.ItemsService;
@@ -37,7 +36,7 @@ public class OrdersServlet extends HttpServlet {
                 new CreateCustomerMapper()
         );
         itemsService = new ItemsService(
-                new ItemsDao(new ItemMapper())
+                new ItemsDao()
         );
     }
 
