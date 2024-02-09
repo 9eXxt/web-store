@@ -1,11 +1,18 @@
 # Maven generated files
-service/target/
-web/target/
-database/target/
+model/target/
+controller/target/
+view/target/
 
 # macOS system files
 .DS_Store
 .DS_Store?
+Thumbs.db
 
 # IntelliJ IDEA project files
 .idea/
+*.iml
+
+# Файлы сборки
+*.jar
+*.war
+*.ear
