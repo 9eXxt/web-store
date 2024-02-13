@@ -19,8 +19,8 @@ public class UserSessionService {
         userSessionDao.createSession(userSession);
     }
 
-    public Optional<UserSessionDto> findToken(Integer customer_id, String ip_address, String device_info) {
-        return userSessionDao.findToken(customer_id, ip_address, device_info)
+    public Optional<UserSessionDto> findToken(Integer customer_id) {
+        return userSessionDao.findToken(customer_id)
                 .map(userSession -> new UserSessionDto(userSession.getSession_token()));
     }
 }

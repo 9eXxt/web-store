@@ -26,7 +26,7 @@ public class AuthorizationFilter implements Filter {
 
     public AuthorizationFilter() {
         customerService = new CustomerService(
-                new CustomerDao(new CustomerMapper()),
+                new CustomerDao(),
                 new CreateCustomerValidator(),
                 new CreateCustomerMapper()
         );

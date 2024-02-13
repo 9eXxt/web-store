@@ -23,7 +23,7 @@ public class CustomerServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         customerService = new CustomerService(
-                new CustomerDao(new CustomerMapper()),
+                new CustomerDao(),
                 new CreateCustomerValidator(),
                 new CreateCustomerMapper()
         );

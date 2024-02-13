@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import mapper.CreateCustomerMapper;
 import mapper.CreateUserSessionMapper;
-import mapper.CustomerMapper;
 import service.CustomerService;
 import service.UserSessionService;
 import util.JspHelper;
@@ -34,7 +33,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         customerService = new CustomerService(
-                new CustomerDao(new CustomerMapper()),
+                new CustomerDao(),
                 new CreateCustomerValidator(),
                 new CreateCustomerMapper()
         );
@@ -65,7 +64,7 @@ public class LoginServlet extends HttpServlet {
         String deviceInfo = req.getHeader("User-Agent");
 
         Optional<UserSessionDto> existingToken = userSessionService
-                .findToken(customerDto.getCustomer_id(), IP, deviceInfo);
+                .findToken(customerDto.getCustomer_id());
 
         String sessionToken;
         if (existingToken.isPresent()) {

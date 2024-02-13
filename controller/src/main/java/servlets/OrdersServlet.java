@@ -31,7 +31,7 @@ public class OrdersServlet extends HttpServlet {
                 new OrdersDao(new OrderMapper())
         );
         customerService = new CustomerService(
-                new CustomerDao(new CustomerMapper()),
+                new CustomerDao(),
                 new CreateCustomerValidator(),
                 new CreateCustomerMapper()
         );

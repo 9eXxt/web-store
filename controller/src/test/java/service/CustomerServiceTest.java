@@ -4,6 +4,8 @@ import dao.CustomerDao;
 import dto.CreateCustomerDto;
 import dto.CustomerDto;
 import entity.Customer;
+import entity.PersonalInfo;
+import entity.Role;
 import exception.ValidationException;
 import mapper.CreateCustomerMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,8 +43,20 @@ class CustomerServiceTest {
 
     @BeforeEach
     void setUp() {
-        customer = new Customer(1, "Bob", "Biden", "123-424-2222",
-                "ivan.ivanov@example.com", "password123", "123 Main St, Город, Страна");
+        PersonalInfo personalInfo = PersonalInfo.builder()
+                .first_name("Bob")
+                .last_name("Biden")
+                .address("123 Main St, Город, Страна")
+                .build();
+
+        customer = Customer.builder()
+                .customer_id(1)
+                .personalInfo(personalInfo)
+                .email("ivan.ivanov@example.com")
+                .phone_number("123-424-2222")
+                .password("password123")
+                .role(Role.USER)
+                .build();
     }
 
     @Test
@@ -60,7 +74,8 @@ class CustomerServiceTest {
                 .hasValueSatisfying(customerDto -> {
                     assertThat(customerDto.getCustomer_id()).isEqualTo(customer.getCustomer_id());
                     assertThat(customerDto.getName())
-                            .isEqualTo(customer.getLast_name() + " " + customer.getFirst_name());
+                            .isEqualTo(customer.getPersonalInfo().getLast_name()
+                                    + " " + customer.getPersonalInfo().getFirst_name());
                     assertThat(customerDto.getEmail()).isEqualTo(customer.getEmail())
                             .matches("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
                 });
@@ -81,7 +96,8 @@ class CustomerServiceTest {
                 .hasValueSatisfying(customerDto -> {
                     assertThat(customerDto.getCustomer_id()).isEqualTo(customer.getCustomer_id());
                     assertThat(customerDto.getName())
-                            .isEqualTo(customer.getLast_name() + " " + customer.getFirst_name());
+                            .isEqualTo(customer.getPersonalInfo().getLast_name()
+                                    + " " + customer.getPersonalInfo().getFirst_name());
                     assertThat(customerDto.getEmail()).isEqualTo(customer.getEmail())
                             .matches("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
                 });
@@ -92,12 +108,34 @@ class CustomerServiceTest {
     @Test
     @DisplayName("Find all customers in database")
     void findAll_WithValidData_ReturnsListOfCustomers() {
-        Customer customer1 = new Customer(1, "Иван", "Иванов",
-                "123-456-7890", "ivan.ivanov@example.com", "password123",
-                "123 Main St, Город, Страна");
-        Customer customer2 = new Customer(2, "Мария", "Петрова",
-                "098-765-4321", "maria.petrova@example.com", "securePassword!",
-                "456 Side Ave, Другой Город, Страна");
+        PersonalInfo personalInfo1 = PersonalInfo.builder()
+                .first_name("Иван")
+                .last_name("Иванов")
+                .address("123 Main St, Город, Страна")
+                .build();
+        Customer customer1 = Customer.builder()
+                .customer_id(1)
+                .personalInfo(personalInfo1)
+                .email("ivan.ivanov@example.com")
+                .phone_number("123-456-7890")
+                .password("password123")
+                .role(Role.USER)
+                .build();
+
+        PersonalInfo personalInfo2 = PersonalInfo.builder()
+                .first_name("Мария")
+                .last_name("Петрова")
+                .address("456 Side Ave, Другой Город, Страна")
+                .build();
+        Customer customer2 = Customer.builder()
+                .customer_id(2)
+                .personalInfo(personalInfo2)
+                .email("maria.petrova@example.com")
+                .phone_number("098-765-4321")
+                .password("securePassword!")
+                .role(Role.ADMIN)
+                .build();
+
         when(customerDao.findAll()).thenReturn(List.of(customer1, customer2));
 
         List<CustomerDto> customers = customerService.findAll();
@@ -112,9 +150,11 @@ class CustomerServiceTest {
                 .extracting("customer_id", "name", "email")
                 .containsExactly(
                         tuple(customer1.getCustomer_id(),
-                                customer1.getLast_name() + " " + customer1.getFirst_name(), customer1.getEmail()),
+                                customer1.getPersonalInfo().getLast_name()
+                                        + " " + customer1.getPersonalInfo().getFirst_name(), customer1.getEmail()),
                         tuple(customer2.getCustomer_id(),
-                                customer2.getLast_name() + " " + customer2.getFirst_name(), customer2.getEmail())
+                                customer2.getPersonalInfo().getLast_name()
+                                        + " " + customer2.getPersonalInfo().getFirst_name(), customer2.getEmail())
                 );
 
         verify(customerDao, times(1)).findAll();
@@ -132,7 +172,8 @@ class CustomerServiceTest {
                 .hasValueSatisfying(customerDto -> {
                     assertThat(customerDto.getCustomer_id()).isEqualTo(customer.getCustomer_id());
                     assertThat(customerDto.getName())
-                            .isEqualTo(customer.getLast_name() + " " + customer.getFirst_name());
+                            .isEqualTo(customer.getPersonalInfo().getLast_name()
+                                    + " " + customer.getPersonalInfo().getFirst_name());
                     assertThat(customerDto.getEmail()).isEqualTo(customer.getEmail())
                             .matches("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
                 });

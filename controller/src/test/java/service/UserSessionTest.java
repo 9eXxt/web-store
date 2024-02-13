@@ -3,8 +3,11 @@ package service;
 import dao.UserSessionDao;
 import dto.CreateUserSessionDto;
 import dto.UserSessionDto;
+import entity.Customer;
+import entity.PersonalInfo;
 import entity.User_Session;
 import mapper.CreateUserSessionMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,14 +31,29 @@ public class UserSessionTest {
     private UserSessionDao userSessionDao;
     @Mock
     private CreateUserSessionMapper createUserSessionMapper;
+    private Customer customer;
 
+    @BeforeEach
+    void setUp() {
+        PersonalInfo personalInfo = PersonalInfo.builder()
+                .first_name("Bob")
+                .last_name("Biden")
+                .build();
+        customer = Customer.builder()
+                .customer_id(1)
+                .personalInfo(personalInfo)
+                .email("ivan.ivanov@example.com")
+                .phone_number("123-424-2222")
+                .password("password123")
+                .build();
+    }
     @Test
     void create_WithValidData() {
         CreateUserSessionDto createUserSessionDto = new CreateUserSessionDto(
                 "23dsfd", 1, "192.168.1.1", "Lenovo",
                 Timestamp.valueOf(LocalDateTime.now()));
         User_Session userSession = new User_Session(
-                "23dsfd", 1, "192.168.1.1", "Lenovo",
+                "23dsfd", customer, "192.168.1.1", "Lenovo",
                 Timestamp.valueOf(LocalDateTime.now()));
         when(createUserSessionMapper.mapFrom(createUserSessionDto)).thenReturn(userSession);
 
@@ -47,20 +65,17 @@ public class UserSessionTest {
 
     @Test
     void findToken_WithValidData_ReturnsOptionalOfUserSessionDto() {
-        Integer customer_id = 1;
-        String ip_address = "192.168.1.1";
-        String device_info = "Lenovo";
-        User_Session userSession = new User_Session("23dsfd", customer_id, ip_address, device_info,
-                Timestamp.valueOf(LocalDateTime.now()));
+        User_Session userSession = new User_Session("23dsfd", customer, "192.168.1.1",
+                "Lenovo", Timestamp.valueOf(LocalDateTime.now()));
 
-        when(userSessionDao.findToken(customer_id, ip_address, device_info)).thenReturn(Optional.of(userSession));
+        when(userSessionDao.findToken(customer.getCustomer_id())).thenReturn(Optional.of(userSession));
 
-        Optional<UserSessionDto> userSessionDto = userSessionService.findToken(customer_id, ip_address, device_info);
+        Optional<UserSessionDto> userSessionDto = userSessionService.findToken(customer.getCustomer_id());
 
         assertThat(userSessionDto).isPresent()
                 .hasValueSatisfying(userSessionDto1 -> assertThat(userSessionDto1.getSession_token())
                         .isEqualTo(userSession.getSession_token()));
 
-        verify(userSessionDao).findToken(customer_id, ip_address, device_info);
+        verify(userSessionDao).findToken(customer.getCustomer_id());
     }
 }

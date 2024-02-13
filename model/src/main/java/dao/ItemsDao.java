@@ -2,19 +2,7 @@ package dao;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import entity.Items;
-
-import entity.QItems;
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
-import mapper.ItemMapper;
-import org.hibernate.annotations.processing.HQL;
-import util.ConnectionManager;
 import util.ConnectionUtil;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
 
 import static entity.QItems.*;

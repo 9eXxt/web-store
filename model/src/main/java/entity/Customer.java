@@ -1,20 +1,37 @@
 package entity;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-@ToString
+@EqualsAndHashCode(of = {"phone_number", "email"})
+@ToString(exclude = "userSession")
+@Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"phone_number","email"})
+})
 public class Customer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer customer_id;
-    private String first_name;
-    private String last_name;
+    @Embedded
+    private PersonalInfo personalInfo;
+    @NotNull
     private String phone_number;
+    @NotNull
     private String email;
+    @NotNull
     private String password;
-    private String address;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+    @OneToOne(mappedBy = "customer",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            optional = false)
+    private User_Session userSession;
 }
