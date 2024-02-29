@@ -10,8 +10,10 @@
         <property name="hbm2ddl">validate</property>
         <property name="format_sql">true</property>
 
-        <mapping class="entity.Items"/>
+        <mapping class="entity.Item"/>
         <mapping class="entity.Customer"/>
-        <mapping class="entity.User_Session"/>
+        <mapping class="entity.UserSession"/>
+        <mapping class="entity.Order"/>
+        <mapping class="entity.OrderItem"/>
     </session-factory>
 </hibernate-configuration>

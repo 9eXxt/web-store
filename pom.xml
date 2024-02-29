@@ -25,51 +25,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>19</java.version>
         <compiler.version>3.12.1</compiler.version>
-        <failsafe.version>3.2.3</failsafe.version>
-        <surefire.version>3.2.3</surefire.version>
+        <failsafe.version>3.2.5</failsafe.version>
+        <surefire.version>3.2.5</surefire.version>
         <jacoco.version>0.8.11</jacoco.version>
         <lombok.version>1.18.30</lombok.version>
-        <junit.version>5.9.2</junit.version>
+        <junit.version>5.10.2</junit.version>
         <mockito.version>5.9.0</mockito.version>
         <assertj.version>3.24.2</assertj.version>
         <maven.compiler.source>19</maven.compiler.source>
         <maven.compiler.target>19</maven.compiler.target>
     </properties>
-
-    <profiles>
-        <profile>
-            <id>test</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.cargo</groupId>
-                        <artifactId>cargo-maven3-plugin</artifactId>
-                        <version>${cargo.version}</version>
-                        <configuration>
-                            <container>
-                                <containerId>tomcat10x</containerId>
-                                <type>installed</type>
-                                <home>/Users/bogdanromanenko/Documents/apache-tomcat-10.1.13</home>
-                            </container>
-                            <deployables>
-                                <deployable>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <type>war</type>
-                                    <properties>
-                                        <context>/shop</context>
-                                    </properties>
-                                </deployable>
-                            </deployables>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <build>
         <pluginManagement>
@@ -101,26 +66,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.version}</version>
-                    <executions>
-                        <execution>
-                            <id>prepare-agent</id>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>jacoco-report</id>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                            <phase>verify</phase>
-                        </execution>
-                    </executions>
+<!--                    <configuration>-->
+<!--                        <testClassesDirectory>${project.build.testOutputDirectory}/unit</testClassesDirectory>-->
+<!--                    </configuration>-->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -158,6 +106,7 @@
                 <version>${assertj.version}</version>
                 <scope>test</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 

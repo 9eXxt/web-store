@@ -1,8 +1,8 @@
 package access;
 
-import dto.CustomerDto;
+import dto.CustomerReadDto;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface AccessRule {
-    boolean isAllowed(HttpServletRequest request, CustomerDto customerDto);
+    boolean isAllowed(HttpServletRequest request, CustomerReadDto customerReadDto);
 }

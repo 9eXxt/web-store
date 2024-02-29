@@ -15,7 +15,7 @@
     <title><fmt:message key="page.orders.customer.title"/></title>
 </head>
 <body>
-<h1><fmt:message key="page.orders.customer.orders"/> ${requestScope.customerInfo.name}</h1>
+<h1><fmt:message key="page.orders.customer.orders"/> ${requestScope.customerInfo.personalInfo.first_name} ${requestScope.customerInfo.personalInfo.last_name}</h1>
 <ol>
 <c:forEach var="customerOrder" items="${requestScope.customerOrders}">
   <li>

@@ -1,17 +1,18 @@
 package servlets;
 
 import dao.CustomerDao;
-import dto.CreateCustomerDto;
+import dto.CustomerCreateDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import mapper.CreateCustomerMapper;
 import mapper.CustomerMapper;
+import mapper.CustomerReadMapper;
+import org.hibernate.SessionFactory;
 import service.CustomerService;
+import util.ConnectionUtil;
 import util.JspHelper;
-import validator.CreateCustomerValidator;
 
 import java.io.IOException;
 
@@ -21,10 +22,12 @@ public class RegistrationServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        SessionFactory sessionFactory = ConnectionUtil.getSessionFactory();
         customerService = new CustomerService(
                 new CustomerDao(),
-                new CreateCustomerValidator(),
-                new CreateCustomerMapper()
+                new CustomerMapper(),
+                new CustomerReadMapper(),
+                sessionFactory
         );
     }
 
@@ -35,13 +38,13 @@ public class RegistrationServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        customerService.create(new CreateCustomerDto(req.getParameter("first_name"),
+        customerService.createUser(new CustomerCreateDto(req.getParameter("first_name"),
                 req.getParameter("last_name"),
                 req.getParameter("phone_number"),
                 req.getParameter("email"),
                 req.getParameter("password"),
                 req.getParameter("address")));
-        resp.sendRedirect("/login");
+        resp.sendRedirect("/shop/login");
         req.getParameter("first_name");
     }
 }

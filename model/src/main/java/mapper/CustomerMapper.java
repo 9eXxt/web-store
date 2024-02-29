@@ -1,26 +1,22 @@
 package mapper;
 
+import dto.CustomerCreateDto;
 import entity.Customer;
 import entity.PersonalInfo;
-import lombok.SneakyThrows;
 
-import java.sql.ResultSet;
-
-public class CustomerMapper implements EntityMapper<Customer> {
-    @SneakyThrows
+public class CustomerMapper implements Mapper<CustomerCreateDto, Customer> {
     @Override
-    public Customer buildEntity(ResultSet resultSet) {
+    public Customer mapFrom(CustomerCreateDto object) {
         PersonalInfo personalInfo = PersonalInfo.builder()
-                .first_name(resultSet.getString("first_name"))
-                .last_name(resultSet.getString("last_name"))
-                .address(resultSet.getString("address"))
+                .first_name(object.getFirst_name())
+                .last_name(object.getLast_name())
+                .address(object.getAddress())
                 .build();
         return Customer.builder()
-                .customer_id(resultSet.getInt("customer_id"))
                 .personalInfo(personalInfo)
-                .phone_number(resultSet.getString("phone_number"))
-                .email(resultSet.getString("email"))
-                .password(resultSet.getString("password"))
+                .phone_number(object.getPhone_number())
+                .email(object.getEmail())
+                .password(object.getPassword())
                 .build();
     }
 }
