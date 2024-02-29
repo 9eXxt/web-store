@@ -1,61 +1,128 @@
 package service;
 
 import dao.CustomerDao;
-import dto.CreateCustomerDto;
-import dto.CustomerDto;
+import dto.CustomerCreateDto;
+import dto.CustomerReadDto;
 import entity.Customer;
-import exception.ValidationException;
-import mapper.CreateCustomerMapper;
-import validator.CreateCustomerValidator;
-import validator.ValidationResult;
+import entity.Role;
+import lombok.RequiredArgsConstructor;
+import mapper.CustomerMapper;
+import mapper.CustomerReadMapper;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import util.SessionUtil;
+import util.ValidationUtil;
 
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.toList;
-
+@RequiredArgsConstructor
 public class CustomerService {
     private final CustomerDao customerDao;
-    private final CreateCustomerValidator createCustomerValidator;
-    private final CreateCustomerMapper createCustomerMapper;
-    public CustomerService(CustomerDao customerDao, CreateCustomerValidator createCustomerValidator,
-                           CreateCustomerMapper createCustomerMapper) {
-        this.customerDao = customerDao;
-        this.createCustomerValidator = createCustomerValidator;
-        this.createCustomerMapper = createCustomerMapper;
+    private final CustomerMapper customerMapper;
+    private final CustomerReadMapper customerReadMapper;
+    private final SessionFactory sessionFactory;
+
+    public Optional<CustomerReadDto> login(String email, String password) {
+        Session session = null;
+        try {
+            session = SessionUtil.openSession(sessionFactory);
+
+            return customerDao.findByEmailAndPassword(email, password)
+                    .map(customerReadMapper::mapFrom);
+        } finally {
+            if (session != null) {
+                SessionUtil.closeSession();
+            }
+        }
     }
 
-    public Optional<CustomerDto> login(String email, String password) {
-        return customerDao.findByEmailAndPassword(email, password)
-                .map(customer ->
-                        new CustomerDto(customer.getCustomer_id(),
-                                customer.getLast_name() + " " + customer.getFirst_name(), customer.getEmail()));
-    }
-    public Optional<CustomerDto> findByToken(String token) {
-        return customerDao.findByToken(token)
-                .map(customer ->
-                        new CustomerDto(customer.getCustomer_id(),
-                                customer.getLast_name() + " " + customer.getFirst_name(),customer.getEmail()));
-    }
-    public List<CustomerDto> findAll() {
-        return customerDao.findAll().stream()
-                .map(customer ->
-                        new CustomerDto(customer.getCustomer_id(),
-                                customer.getLast_name() + " " + customer.getFirst_name(), customer.getEmail()))
-                .collect(toList());
-    }
-    public Optional<CustomerDto> findById(Integer customer_id) {
-        return customerDao.findById(customer_id)
-                .map(customer ->
-                        new CustomerDto(customer.getCustomer_id(),
-                                customer.getLast_name() + " " + customer.getFirst_name(), customer.getEmail()));
-    }
-    public void create(CreateCustomerDto createCustomerDto) {
-        ValidationResult validationResult = createCustomerValidator.isValid(createCustomerDto);
-        if(!validationResult.isValid()) {
-            throw new ValidationException(validationResult.getErrors());
+    public Optional<CustomerReadDto> findByToken(String token) {
+        Session session = null;
+        try {
+            session = SessionUtil.openSession(sessionFactory);
+
+            return customerDao.findByToken(token)
+                    .map(customerReadMapper::mapFrom);
+        } finally {
+            if (session != null) {
+                SessionUtil.closeSession();
+            }
         }
-        Customer customer = createCustomerMapper.mapFrom(createCustomerDto);
-        customerDao.save(customer);
+    }
+
+    public List<CustomerReadDto> findAll() {
+        Session session = null;
+        try {
+            session = SessionUtil.openSession(sessionFactory);
+
+            return customerDao.findAll().stream()
+                    .map(customerReadMapper::mapFrom)
+                    .toList();
+        } finally {
+            if (session != null) {
+                SessionUtil.closeSession();
+            }
+        }
+    }
+
+    public Optional<CustomerReadDto> findById(Integer customer_id) {
+        Session session = null;
+        try {
+            session = SessionUtil.openSession(sessionFactory);
+
+            return customerDao.findById(customer_id)
+                    .map(customerReadMapper::mapFrom);
+        } finally {
+            if (session != null) {
+                SessionUtil.closeSession();
+            }
+        }
+    }
+
+//    public Optional<CustomerReadDto> findByEmail(Integer customer_id) {
+//        SessionUtil.openSession(sessionFactory);
+//
+//        var customerDto = customerDao.findBy(customer_id)
+//                .map(customerReadMapper::mapFrom);
+//
+//        SessionUtil.closeSession();
+//        return customerDto;
+//    }
+
+    public void createUser(CustomerCreateDto customerCreateDto) {
+        create(customerCreateDto, Role.USER);
+    }
+
+    public void createAdmin(CustomerCreateDto customerCreateDto) {
+        create(customerCreateDto, Role.ADMIN);
+    }
+
+    public void create(CustomerCreateDto customerCreateDto, Role role) {
+        ValidationUtil.validate(customerCreateDto);
+
+        Customer customer = customerMapper.mapFrom(customerCreateDto);
+        customer.setRole(role);
+
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = SessionUtil.openSession(sessionFactory);
+            transaction = session.beginTransaction();
+
+            customerDao.save(customer);
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if(transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            if(session != null) {
+                SessionUtil.closeSession();
+            }
+        }
     }
 }

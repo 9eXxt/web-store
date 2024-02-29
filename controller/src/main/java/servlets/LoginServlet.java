@@ -2,9 +2,9 @@ package servlets;
 
 import dao.CustomerDao;
 import dao.UserSessionDao;
-import dto.CreateUserSessionDto;
-import dto.CustomerDto;
-import dto.UserSessionDto;
+import dto.UserSessionCreateDto;
+import dto.CustomerReadDto;
+import dto.UserSessionReadDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.Cookie;
@@ -12,13 +12,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
-import mapper.CreateCustomerMapper;
-import mapper.CreateUserSessionMapper;
 import mapper.CustomerMapper;
+import mapper.CustomerReadMapper;
+import mapper.UserSessionMapper;
+import mapper.UserSessionReadMapper;
+import org.hibernate.SessionFactory;
 import service.CustomerService;
 import service.UserSessionService;
+import util.ConnectionUtil;
 import util.JspHelper;
-import validator.CreateCustomerValidator;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -33,14 +35,18 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
+        SessionFactory sessionFactory = ConnectionUtil.getSessionFactory();
         customerService = new CustomerService(
-                new CustomerDao(new CustomerMapper()),
-                new CreateCustomerValidator(),
-                new CreateCustomerMapper()
+                new CustomerDao(),
+                new CustomerMapper(),
+                new CustomerReadMapper(),
+                sessionFactory
         );
         userSessionService = new UserSessionService(
                 new UserSessionDao(),
-                new CreateUserSessionMapper()
+                new UserSessionMapper(),
+                new UserSessionReadMapper(),
+                sessionFactory
         );
     }
 
@@ -60,21 +66,21 @@ public class LoginServlet extends HttpServlet {
     }
 
     @SneakyThrows
-    private void loginSuccess(CustomerDto customerDto, HttpServletRequest req, HttpServletResponse resp) {
+    private void loginSuccess(CustomerReadDto customerReadDto, HttpServletRequest req, HttpServletResponse resp) {
         String IP = req.getRemoteAddr();
         String deviceInfo = req.getHeader("User-Agent");
 
-        Optional<UserSessionDto> existingToken = userSessionService
-                .findToken(customerDto.getCustomer_id(), IP, deviceInfo);
+        Optional<UserSessionReadDto> existingToken = userSessionService
+                .findToken(customerReadDto.getCustomer_id());
 
         String sessionToken;
         if (existingToken.isPresent()) {
-            sessionToken = existingToken.get().getSession_token();
+            sessionToken = existingToken.get().session_token();
         } else {
             sessionToken = UUID.randomUUID().toString();
-            userSessionService.create(new CreateUserSessionDto(
+            userSessionService.create(new UserSessionCreateDto(
                     sessionToken,
-                    customerDto.getCustomer_id(),
+                    customerReadDto.getCustomer_id(),
                     IP,
                     deviceInfo,
                     Timestamp.valueOf(LocalDateTime.now().plusDays(30))));
@@ -84,8 +90,8 @@ public class LoginServlet extends HttpServlet {
         sessionCookie.setMaxAge(60 * 60 * 24 * 30);
         resp.addCookie(sessionCookie);
 
-        req.getSession().setAttribute("customer", customerDto);
-        resp.sendRedirect("/shop/orders?customerId=" + customerDto.getCustomer_id());
+        req.getSession().setAttribute("customer", customerReadDto);
+        resp.sendRedirect("/shop/orders?customerId=" + customerReadDto.getCustomer_id());
     }
 
     @SneakyThrows

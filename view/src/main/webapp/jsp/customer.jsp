@@ -18,8 +18,8 @@
     <ol>
         <c:forEach var="customer" items="${requestScope.customers}">
             <li>
-                <a href="${pageContext.request.contextPath}/orders?customerId=${customer.customer_id}&customerName=${customer.name}">
-                        ${customer.name}</a>
+                <a href="${pageContext.request.contextPath}/orders?customerId=${customer.customer_id}">
+                        ${customer.personalInfo.first_name} ${customer.personalInfo.last_name}</a>
             </li>
         </c:forEach>
     </ol>

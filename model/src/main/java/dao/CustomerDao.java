@@ -1,122 +1,66 @@
 package dao;
 
+import com.querydsl.jpa.impl.JPAQuery;
 import entity.Customer;
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
-import mapper.CustomerMapper;
-import util.ConnectionManager;
+import util.SessionUtil;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Optional;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static entity.QCustomer.customer;
+import static entity.QUserSession.*;
 
-@AllArgsConstructor
-public class CustomerDao {
-    private final CustomerMapper customerMapper;
-    private static final String FIND_ALL = """
-            SELECT *
-            FROM customer;
-            """;
-    private static final String SAVE_SQL = """
-            INSERT INTO customer (first_name, last_name, phone_number, email, password, address)
-            VALUES (?,?,?,?,?,?);
-            """;
-    private static final String FIND_BY_EMAIL_AND_PASSWORD = """
-            SELECT *
-            FROM customer
-            WHERE email = ?
-            AND password = ?;
-            """;
-    private static final String FIND_BY_ID = """
-            SELECT *
-            FROM customer
-            WHERE customer_id = ?;
-            """;
-    private static final String FIND_BY_TOKEN = """
-            SELECT customer.*
-            FROM user_sessions
-            JOIN customer USING (customer_id)
-            WHERE session_token = ?""";
 
-    @SneakyThrows
-    public List<Customer> findAll() {
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<Customer> customerList = new ArrayList<>();
-            while (resultSet.next()) {
-                customerList.add(customerMapper.buildEntity(resultSet));
-            }
-            return customerList;
-        }
+public class CustomerDao extends CRUD<Integer, Customer> {
+    public CustomerDao() {
+        super(Customer.class);
     }
 
-    @SneakyThrows
     public Optional<Customer> findByToken(String token) {
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_TOKEN)) {
-            preparedStatement.setString(1, token);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            Customer customer = null;
-            if (resultSet.next()) {
-                customer = customerMapper.buildEntity(resultSet);
-            }
-            return Optional.ofNullable(customer);
-        }
+        var session = SessionUtil.getSession();
+        return new JPAQuery<Customer>(session)
+                .select(customer)
+                .from(customer)
+                .join(userSession)
+                .on(customer.customer_id.eq(userSession.customer.customer_id))
+                .where(userSession.session_token.eq(token))
+                .stream().findAny();
     }
 
-    @SneakyThrows
-    public Optional<Customer> findById(Integer customer_id) {
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_ID)) {
-            preparedStatement.setInt(1, customer_id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            Customer customer = null;
-            if (resultSet.next()) {
-                customer = customerMapper.buildEntity(resultSet);
-            }
-            return Optional.ofNullable(customer);
-        }
-    }
-
-    @SneakyThrows
     public Optional<Customer> findByEmailAndPassword(String email, String password) {
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_EMAIL_AND_PASSWORD)) {
-            preparedStatement.setString(1, email);
-            preparedStatement.setString(2, password);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            Customer customer = null;
-            if (resultSet.next()) {
-                customer = customerMapper.buildEntity(resultSet);
-            }
-            return Optional.ofNullable(customer);
-        }
+        var session = SessionUtil.getSession();
+        return new JPAQuery<Customer>(session)
+                .select(customer)
+                .from(customer)
+                .where(customer.email.eq(email)
+                        .and(customer.password.eq(password)))
+                .stream().findAny();
     }
 
-    @SneakyThrows
-    public void save(Customer customer) {
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SAVE_SQL, RETURN_GENERATED_KEYS)) {
-            preparedStatement.setObject(1, customer.getFirst_name());
-            preparedStatement.setObject(2, customer.getLast_name());
-            preparedStatement.setObject(3, customer.getPhone_number());
-            preparedStatement.setObject(4, customer.getEmail());
-            preparedStatement.setObject(5, customer.getPassword());
-            preparedStatement.setObject(6, customer.getAddress());
-
-            preparedStatement.executeUpdate();
-
-            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-            generatedKeys.next();
-            customer.setCustomer_id(generatedKeys.getObject("customer_id", Integer.class));
-
-        }
+    public Optional<Customer> findByEmailOrPhoneNumber(String email, String phone_number) {
+        var session = SessionUtil.getSession();
+        return new JPAQuery<Customer>(session)
+                .select(customer)
+                .from(customer)
+                .where(customer.email.eq(email).or(customer.phone_number.eq(phone_number)))
+                .stream().findAny();
     }
+    //    @SneakyThrows
+//    public boolean save(Customer customer) {
+//        var connection = ConnectionUtil.sessionFactory();
+//        Transaction transaction = null;
+//        try (var session = connection.openSession()) {
+//            transaction = session.beginTransaction();
+//            if (findByEmailOrPhoneNumber(customer.getEmail(), customer.getPhone_number()).isPresent()) {
+//                return false;
+//            }
+//            session.persist(customer);
+//            transaction.commit();
+//            return true;
+//        } catch (Exception e) {
+//            transaction.rollback();
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
 }

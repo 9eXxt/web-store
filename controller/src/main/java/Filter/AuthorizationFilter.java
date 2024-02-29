@@ -5,16 +5,17 @@ import access.AdminAccessRule;
 import access.LoggedInAccessRule;
 import access.PublicAccessRule;
 import dao.CustomerDao;
-import dto.CustomerDto;
+import dto.CustomerReadDto;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import mapper.CreateCustomerMapper;
 import mapper.CustomerMapper;
+import mapper.CustomerReadMapper;
+import org.hibernate.SessionFactory;
 import service.CustomerService;
-import validator.CreateCustomerValidator;
+import util.ConnectionUtil;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,10 +26,12 @@ public class AuthorizationFilter implements Filter {
     private final List<AccessRule> accessRules;
 
     public AuthorizationFilter() {
+        SessionFactory sessionFactory = ConnectionUtil.getSessionFactory();
         customerService = new CustomerService(
-                new CustomerDao(new CustomerMapper()),
-                new CreateCustomerValidator(),
-                new CreateCustomerMapper()
+                new CustomerDao(),
+                new CustomerMapper(),
+                new CustomerReadMapper(),
+                sessionFactory
         );
 
         accessRules = new ArrayList<>();
@@ -45,10 +48,10 @@ public class AuthorizationFilter implements Filter {
         setLanguage(httpServletRequest);
         checkSessionToken(httpServletRequest);
 
-        CustomerDto customerDto = (CustomerDto) httpServletRequest.getSession().getAttribute("customer");
+        CustomerReadDto customerReadDto = (CustomerReadDto) httpServletRequest.getSession().getAttribute("customer");
 
         for (AccessRule rule : accessRules) {
-            if (rule.isAllowed(httpServletRequest, customerDto)) {
+            if (rule.isAllowed(httpServletRequest, customerReadDto)) {
                 filterChain.doFilter(servletRequest, servletResponse);
                 return;
             }
@@ -74,7 +77,7 @@ public class AuthorizationFilter implements Filter {
         if (cookieInfo == null) {
             return;
         }
-        Optional<CustomerDto> userSession = customerService.findByToken(cookieInfo);
+        Optional<CustomerReadDto> userSession = customerService.findByToken(cookieInfo);
         userSession.ifPresent(customerDto -> request.getSession().setAttribute("customer", customerDto));
 
         request.getSession().setAttribute("tokenChecked", true);
