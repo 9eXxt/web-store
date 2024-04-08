@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{page.orders.item.title}">Title</title>
+</head>
+<header th:insert="~{fragment :: locale}"></header>
+<body>
+<h1 th:text="|#{page.orders.item.orders.item}: ${itemOrderCustomer.item.name}|"></h1>
+<ol>
+    <li th:each="orders : ${itemOrderCustomer.customerOrderList}" th:object="${orders.customerReadDto.personalInfo}">
+        <b th:text="|#{page.orders.item.full.name}: *{first_name} *{last_name}|"/>
+        <br>
+        <b th:text="|#{page.orders.item.order.number}: ${orders.orderReadDto.order_id}|"/> <br>
+        <b th:text="|#{page.orders.item.date.creation}: ${#temporals.format(orders.orderReadDto.order_date, 'yyyy-MM-dd HH:mm:ss')}|"/> <br>
+        <b th:text="|#{page.orders.item.status.order}: ${orders.orderReadDto.order_status}|"/> <br>
+    </li>
+</ol>
+<div th:insert="~{fragment :: logout}"></div>
+</body>
+</html>
