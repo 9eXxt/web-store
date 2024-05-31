@@ -13,7 +13,9 @@ public class ValidationUtil {
 
     public static void validate(Object object) {
         Set<ConstraintViolation<Object>> violations = validator.validate(object);
+        System.out.println("Check exceptions");
         if (!violations.isEmpty()) {
+            System.out.println("Errors");
             throw new ConstraintViolationException(violations);
         }
     }

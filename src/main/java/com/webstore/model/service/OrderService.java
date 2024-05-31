@@ -25,8 +25,9 @@ public class OrderService {
     public CustomerOrdersDto findOrdersByCustomer(Integer customer_id) {
         List<Object[]> result = orderRepository.findOrdersByCustomer_id(customer_id);
         Customer customerTemp = (Customer) result.get(0)[0];
-        CustomerReadDto customer = new CustomerReadDto(customerTemp.getCustomer_id(), customerTemp.getPersonalInfo(),
-                customerTemp.getEmail());
+        CustomerReadDto customer = new CustomerReadDto(customerTemp.getCustomer_id(), customerTemp.getPersonalInfo().getFirst_name(),
+                customerTemp.getPersonalInfo().getLast_name(), customerTemp.getEmail(), customerTemp.getPhone_number(),
+                customerTemp.getPersonalInfo().getAddress());
         List<OrderReadDto> orders = result.stream()
                 .map(order -> (Order) order[1])
                 .map(order -> new OrderReadDto(order.getOrder_id(), order.getOrder_date(), order.getOrder_status(),

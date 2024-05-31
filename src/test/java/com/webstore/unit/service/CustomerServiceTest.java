@@ -5,7 +5,7 @@ import com.webstore.model.dto.CustomerReadDto;
 import com.webstore.model.entity.Customer;
 import com.webstore.model.entity.PersonalInfo;
 import com.webstore.model.entity.Role;
-import com.webstore.model.mapper.CustomerMapper;
+import com.webstore.model.mapper.CustomerCreateMapper;
 import com.webstore.model.mapper.CustomerReadMapper;
 import com.webstore.model.repository.CustomerRepository;
 import com.webstore.model.service.CustomerService;
@@ -40,7 +40,7 @@ class CustomerServiceTest {
     @Mock
     private CustomerRepository customerRepository;
     @Mock
-    private CustomerMapper customerMapper;
+    private CustomerCreateMapper customerCreateMapper;
     @Mock
     private CustomerReadMapper customerReadMapper;
     @Mock
@@ -229,9 +229,9 @@ class CustomerServiceTest {
     @DisplayName("Creating a new customer")
     void create_WithValidData() {
         CustomerCreateDto customerCreateDto = new CustomerCreateDto("Bob", "Biden", "123-424-2222",
-                "ivan.ivanov@example.com", "password123", "123 Main St, Город, Страна");
+                "ivan.ivanov@example.com", "password123");
 
-        when(customerMapper.mapFrom(customerCreateDto)).thenReturn(customer);
+        when(customerCreateMapper.mapFrom(customerCreateDto)).thenReturn(customer);
 
         try (MockedStatic<SessionUtil> mockedStatic = mockStatic(SessionUtil.class);
              MockedStatic<ValidationUtil> mockedStatic1 = mockStatic(ValidationUtil.class)) {

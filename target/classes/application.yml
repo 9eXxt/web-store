@@ -18,3 +18,13 @@ spring:
     open-in-view: false
   messages:
     basename: translations
+jwt:
+  secret: 12r2rf2tg43greh2t43yhrfd231fdsffdgf2qgbdf
+  lifetime: 30d
+server:
+  ssl:
+    key-store-type: JKS
+    key-store: /Users/bogdanromanenko/Documents/HTTPS/keystore.jks
+    enabled: true
+    key-store-password: password
+    keyAlias: keyForBack

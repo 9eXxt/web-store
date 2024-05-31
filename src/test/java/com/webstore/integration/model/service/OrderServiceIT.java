@@ -2,6 +2,8 @@ package com.webstore.integration.model.service;
 
 
 import com.webstore.integration.IntegrationTestBase;
+import com.webstore.model.dto.CustomerOrdersDto;
+import com.webstore.model.dto.ItemOrdersDto;
 import com.webstore.model.dto.OrderReadDto;
 import com.webstore.model.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +17,15 @@ public class OrderServiceIT extends IntegrationTestBase {
     private final OrderService orderService;
     @Test
     void findOrdersByCustomer_WithValidData_ReturnsListOfOrdersDto() {
-        List<OrderReadDto> orderDtoList = orderService.findOrdersByCustomer(1);
+        CustomerOrdersDto orderDtoList = orderService.findOrdersByCustomer(1);
 
-        assertThat(orderDtoList).isNotEmpty();
+        assertThat(orderDtoList.getOrdersList()).isNotEmpty();
     }
 
     @Test
     void findOrdersByItem_WithValidData_ReturnsListOfOrdersDto() {
-        List<OrderReadDto> ordersDtoList = orderService.findOrdersByItem(1);
+        ItemOrdersDto ordersDtoList = orderService.findOrdersByItem(1);
 
-        assertThat(ordersDtoList).isNotEmpty();
+        assertThat(ordersDtoList.getCustomerOrderList()).isNotEmpty();
     }
 }

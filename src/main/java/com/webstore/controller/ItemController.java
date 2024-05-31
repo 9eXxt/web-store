@@ -18,10 +18,4 @@ public class ItemController {
         model.addAttribute("items", itemService.findAll());
         return "/item";
     }
-//    @Override
-//    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//        req.setAttribute("items", itemService.findAll());
-//        req.getRequestDispatcher(JspHelper.getPath("item"))
-//                .forward(req, resp);
-//    }
 }
