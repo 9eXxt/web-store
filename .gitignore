@@ -1,7 +1,5 @@
 # Maven generated files
-model/target/
-controller/target/
-view/target/
+/target
 
 # macOS system files
 .DS_Store
