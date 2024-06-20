@@ -51,7 +51,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if ("token".equals(cookie.getName())) {
-                        System.out.println("Gay website");
                         jwt = cookie.getValue();
                         email = getEmailFromJwt(jwt, email);
                         break;
@@ -59,7 +58,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             }
         }
-        System.out.println("Gay website 1");
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                     email,

@@ -1,5 +1,6 @@
 package com.webstore.model.dto;
 
+import com.webstore.model.entity.OrderStatus;
 import lombok.Value;
 
 import java.time.LocalDateTime;
@@ -7,7 +8,7 @@ import java.time.LocalDateTime;
 public class OrderReadDto {
     Integer order_id;
     LocalDateTime order_date;
-    String order_status;
+    OrderStatus order_status;
     Integer customer_id;
 }
 

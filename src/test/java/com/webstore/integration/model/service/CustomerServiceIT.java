@@ -64,7 +64,7 @@ public class CustomerServiceIT extends IntegrationTestBase {
     @DisplayName("Creating a new customer")
     void create_WithValidData() {
         CustomerCreateDto customerCreateDto = new CustomerCreateDto("Bob", "Biden", "+1234242222",
-                "ivan.ivanov@example.com", "paSsword@123");
+                "ivan.ivanov@example.com", "paSsword@123", null);
 
         customerService.createUser(customerCreateDto);
 

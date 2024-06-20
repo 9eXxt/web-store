@@ -14,7 +14,6 @@ import com.webstore.model.util.ValidationUtil;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +48,7 @@ class CustomerServiceTest {
     @Mock
     private Session session;
     @Mock
-    private Transaction transaction;
+    private PasswordEncoder passwordEncoder;
     private Customer customer;
 
     @BeforeEach
@@ -76,8 +76,11 @@ class CustomerServiceTest {
         String password = customer.getPassword();
         CustomerReadDto customerReadDto = new CustomerReadDto(
                 customer.getCustomer_id(),
-                customer.getPersonalInfo(),
-                customer.getEmail()
+                customer.getPersonalInfo().getFirst_name(),
+                customer.getPersonalInfo().getLast_name(),
+                customer.getEmail(),
+                customer.getPhone_number(),
+                customer.getPersonalInfo().getAddress()
         );
 
         when(customerRepository.findByEmailAndPassword(email, password)).thenReturn(Optional.of(customer));
@@ -91,8 +94,10 @@ class CustomerServiceTest {
                     .isPresent()
                     .hasValueSatisfying(customerDto -> {
                         assertThat(customerDto.getCustomer_id()).isEqualTo(customer.getCustomer_id());
-                        assertThat(customerDto.getPersonalInfo())
-                                .isEqualTo(customer.getPersonalInfo());
+                        assertThat(customerDto.getFirst_name())
+                                .isEqualTo(customer.getPersonalInfo().getFirst_name());
+                        assertThat(customerDto.getLast_name())
+                                .isEqualTo(customer.getPersonalInfo().getLast_name());
                         assertThat(customerDto.getEmail()).isEqualTo(customer.getEmail())
                                 .matches("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
                     });
@@ -107,8 +112,11 @@ class CustomerServiceTest {
         String token = "11223344";
         CustomerReadDto customerReadDto = new CustomerReadDto(
                 customer.getCustomer_id(),
-                customer.getPersonalInfo(),
-                customer.getEmail()
+                customer.getPersonalInfo().getFirst_name(),
+                customer.getPersonalInfo().getLast_name(),
+                customer.getEmail(),
+                customer.getPhone_number(),
+                customer.getPersonalInfo().getAddress()
         );
 
         when(customerRepository.findByToken(token)).thenReturn(Optional.of(customer));
@@ -121,8 +129,8 @@ class CustomerServiceTest {
                     .isPresent()
                     .hasValueSatisfying(customerDto -> {
                         assertThat(customerDto.getCustomer_id()).isEqualTo(customer.getCustomer_id());
-                        Assertions.assertThat(customerDto.getPersonalInfo().getLast_name() + " "
-                                              + customerDto.getPersonalInfo().getFirst_name())
+                        Assertions.assertThat(customerDto.getLast_name() + " "
+                                              + customerDto.getFirst_name())
                                 .isEqualTo(customer.getPersonalInfo().getLast_name()
                                         + " " + customer.getPersonalInfo().getFirst_name());
                         assertThat(customerDto.getEmail()).isEqualTo(customer.getEmail())
@@ -170,8 +178,11 @@ class CustomerServiceTest {
         customerList.forEach(customerTemp -> Mockito.when(customerReadMapper.mapFrom(customerTemp))
                 .thenReturn(new CustomerReadDto(
                         customerTemp.getCustomer_id(),
-                        customerTemp.getPersonalInfo(),
-                        customerTemp.getEmail()
+                        customerTemp.getPersonalInfo().getFirst_name(),
+                        customerTemp.getPersonalInfo().getLast_name(),
+                        customerTemp.getEmail(),
+                        customerTemp.getPhone_number(),
+                        customerTemp.getPersonalInfo().getAddress()
                 )));
 
         try (MockedStatic<SessionUtil> mockedStatic = mockStatic(SessionUtil.class)) {
@@ -181,19 +192,32 @@ class CustomerServiceTest {
                     .isNotEmpty()
                     .hasSize(3)
                     .allSatisfy(customerDto -> {
-                        assertThat(customerDto.getPersonalInfo().getFirst_name() + " "
-                                              + customerDto.getPersonalInfo().getLast_name()).matches("[^0-9]+");
+                        assertThat(customerDto.getFirst_name() + " "
+                                              + customerDto.getLast_name()).matches("[^0-9]+");
                         assertThat(customerDto.getEmail()).matches("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
                     })
-                    .extracting("customer_id", "personalInfo", "email")
+                    .extracting("customer_id", "first_name", "last_name", "email", "phone_number", "address")
                     .containsExactly(
                             tuple(customer.getCustomer_id(),
-                                    customer.getPersonalInfo(), customer.getEmail()),
+                                    customer.getPersonalInfo().getFirst_name(),
+                                    customer.getPersonalInfo().getLast_name(),
+                                    customer.getEmail(),
+                                    customer.getPhone_number(),
+                                    customer.getPersonalInfo().getAddress()),
                             tuple(customer1.getCustomer_id(),
-                                    customer1.getPersonalInfo(), customer1.getEmail()),
+                                    customer1.getPersonalInfo().getFirst_name(),
+                                    customer1.getPersonalInfo().getLast_name(),
+                                    customer1.getEmail(),
+                                    customer1.getPhone_number(),
+                                    customer1.getPersonalInfo().getAddress()),
                             tuple(customer2.getCustomer_id(),
-                                    customer2.getPersonalInfo(), customer2.getEmail())
-                    );
+                                    customer2.getPersonalInfo().getFirst_name(),
+                                    customer2.getPersonalInfo().getLast_name(),
+                                    customer2.getEmail(),
+                                    customer2.getPhone_number(),
+                                    customer2.getPersonalInfo().getAddress())
+                    )
+            ;
 
             verify(customerRepository, Mockito.times(1)).findAll();
         }
@@ -205,8 +229,11 @@ class CustomerServiceTest {
         when(customerRepository.findById(1)).thenReturn(Optional.of(customer));
         when(customerReadMapper.mapFrom(customer)).thenReturn(new CustomerReadDto(
                 customer.getCustomer_id(),
-                customer.getPersonalInfo(),
-                customer.getEmail()
+                customer.getPersonalInfo().getFirst_name(),
+                customer.getPersonalInfo().getLast_name(),
+                customer.getEmail(),
+                customer.getPhone_number(),
+                customer.getPersonalInfo().getAddress()
         ));
 
         try (MockedStatic<SessionUtil> mockedStatic = Mockito.mockStatic(SessionUtil.class)) {
@@ -216,7 +243,8 @@ class CustomerServiceTest {
                     .isPresent()
                     .hasValueSatisfying(customerDto -> {
                         assertThat(customerDto.getCustomer_id()).isEqualTo(customer.getCustomer_id());
-                        assertThat(customerDto.getPersonalInfo()).isEqualTo(customer.getPersonalInfo());
+                        assertThat(customerDto.getFirst_name()).isEqualTo(customer.getPersonalInfo().getFirst_name());
+                        assertThat(customerDto.getLast_name()).isEqualTo(customer.getPersonalInfo().getLast_name());
                         assertThat(customerDto.getEmail()).isEqualTo(customer.getEmail())
                                 .matches("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
                     });
@@ -229,9 +257,24 @@ class CustomerServiceTest {
     @DisplayName("Creating a new customer")
     void create_WithValidData() {
         CustomerCreateDto customerCreateDto = new CustomerCreateDto("Bob", "Biden", "123-424-2222",
-                "ivan.ivanov@example.com", "password123");
+                "ivan.ivanov@example.com", "password123", null);
+
+//        Customer createdCustomer = Customer.builder()
+//                .customer_id(1)
+//                .personalInfo(PersonalInfo.builder()
+//                        .first_name("Bob")
+//                        .last_name("Biden")
+//                        .address("123 Main St, Город, Страна")
+//                        .build())
+//                .email("ivan.ivanov@example.com")
+//                .phone_number("123-424-2222")
+//                .password("encodedPassword123")
+//                .role(Role.USER)
+//                .build();
 
         when(customerCreateMapper.mapFrom(customerCreateDto)).thenReturn(customer);
+        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword123");
+//        when(customerRepository.save(customer)).thenReturn(createdCustomer);
 
         try (MockedStatic<SessionUtil> mockedStatic = mockStatic(SessionUtil.class);
              MockedStatic<ValidationUtil> mockedStatic1 = mockStatic(ValidationUtil.class)) {

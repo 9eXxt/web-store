@@ -50,16 +50,6 @@ public class SecurityConfiguration {
                 .build();
     }
 
-//    @Bean
-//    public HttpSessionStrategy httpSessionStrategy() {
-//        CookieHttpSessionStrategy strategy = new CookieHttpSessionStrategy();
-//        DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
-//        cookieSerializer.setSameSite("None");
-////        cookieSerializer.setUseSecureCookie(true); // Убедитесь, что используете HTTPS
-//        strategy.setCookieSerializer(cookieSerializer);
-//        return strategy;
-//    }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

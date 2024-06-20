@@ -21,19 +21,6 @@ public class WebConfiguration implements WebMvcConfigurer {
         return cookieLocaleResolver;
     }
 
-//    @Bean
-//    public WebMvcConfigurer corsConfigurer() {
-//        return new WebMvcConfigurer() {
-//            @Override
-//            public void addCorsMappings(CorsRegistry registry) {
-//                registry.addMapping("/**")
-//                        .allowedOrigins("http://localhost:9000", "http://192.168.1.173:9000")
-//                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-//                        .allowedHeaders("*")
-//                        .allowCredentials(true);
-//            }
-//        };
-//    }
     @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();

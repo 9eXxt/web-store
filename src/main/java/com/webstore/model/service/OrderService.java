@@ -4,8 +4,10 @@ import com.webstore.model.dto.*;
 import com.webstore.model.entity.Customer;
 import com.webstore.model.entity.Item;
 import com.webstore.model.entity.Order;
+import com.webstore.model.entity.OrderItem;
 import com.webstore.model.mapper.CustomerReadMapper;
 import com.webstore.model.mapper.ItemReadMapper;
+import com.webstore.model.mapper.OrderCreateMapper;
 import com.webstore.model.mapper.OrderReadMapper;
 import com.webstore.model.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class OrderService {
     private final OrderReadMapper orderReadMapper;
     private final ItemReadMapper itemReadMapper;
     private final CustomerReadMapper customerReadMapper;
+    private final OrderCreateMapper orderCreateMapper;
     public CustomerOrdersDto findOrdersByCustomer(Integer customer_id) {
         List<Object[]> result = orderRepository.findOrdersByCustomer_id(customer_id);
         Customer customerTemp = (Customer) result.get(0)[0];
@@ -50,5 +53,18 @@ public class OrderService {
                 }).toList();
 
         return new ItemOrdersDto(item, customerOrder);
+    }
+
+    @Transactional
+    public OrderReadDto create(OrderCreateDto orderCreateDto, CustomerReadDto customerReadDto) {
+        Customer customer = Customer.builder()
+                .customer_id(customerReadDto.getCustomer_id())
+                .build();
+
+        Order order = orderCreateMapper.mapFrom(orderCreateDto);
+        order.setCustomer(customer);
+        orderRepository.save(order);
+
+        return orderReadMapper.mapFrom(order);
     }
 }

@@ -3,7 +3,9 @@ package com.webstore.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.eclipse.tags.shaded.org.apache.xpath.operations.String;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,9 @@ public class Order implements Manageable<OrderItem> {
     @NotNull
     private LocalDateTime order_date;
     private LocalDateTime close_order_date;
-    private String order_status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus order_status;
+    private BigDecimal total_price;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private Customer customer;
